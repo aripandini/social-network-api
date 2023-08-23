@@ -1,39 +1,67 @@
 const { Schema, model } = require('mongoose');
+const moment = require('moment');
+
+// Schema to create a Reaction model
+const ReactionSchema = new Schema(
+  {
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
+    },
+    reactionBody: {
+      type: String,
+      required: true,
+      maxlength: 280,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+      get: (createdAtVal) => moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a'),
+    },
+  },
+  {
+    toJSON: {
+        getters: true
+    },
+  });
 
 // Schema to create a Thought model
 const ThoughtSchema = new Schema(
   {
-    ThoughtName: {
+    thoughtText: {
+      type: String,
+      required: true,
+      maxlength: 280,
+      minlength: 1,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now(),
+      get: (createdAtVal) =>
+      moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a'),
+    },
+    username: {
       type: String,
       required: true,
     },
-    inPerson: {
-      type: Boolean,
-      default: true,
-    },
-    startDate: {
-      type: Date,
-      default: Date.now(),
-    },
-    endDate: {
-      type: Date,
-      // Sets a default value of 12 weeks from now
-      default: () => new Date(+new Date() + 84 * 24 * 60 * 60 * 1000),
-    },
-    Users: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-      },
-    ],
+    reactions: [ReactionSchema]
   },
   {
     toJSON: {
-      virtuals: true,
+        virtuals: true,
+        getters: true
     },
-    id: false,
-  }
-);
+    id: false
+  });
+
+// Retrieves the length of the thought's `reactions` array field on query.
+ThoughtSchema.virtual("reactionCount").get(function () {
+  return this.reactions.length;
+});
 
 const Thought = model('Thought', ThoughtSchema);
 

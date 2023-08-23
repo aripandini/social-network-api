@@ -1,32 +1,45 @@
 const { Schema, model } = require('mongoose');
-const assignmentSchema = require('./Reaction');
 
 // Schema to create User model
 const UserSchema = new Schema(
   {
-    first: {
+    username: {
       type: String,
-      required: true,
-      max_length: 50,
+        unique: true,
+        required: true,
+        trim: true
     },
-    last: {
+    email: {
       type: String,
-      required: true,
-      max_length: 50,
+        unique: true,
+        required: true,
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Please enter a valid email address",]
     },
-    github: {
-      type: String,
-      required: true,
-      max_length: 50,
-    },
-    assignments: [assignmentSchema],
+    thoughts: [
+      {
+          type: Schema.Types.ObjectId,
+          ref: "Thought"
+      },
+  ],
+  friends: [
+      {
+          type: Schema.Types.ObjectId,
+          ref: "User"
+      },
+  ]
+}, 
+{
+  toJSON: {
+      virtuals: true,
+      getters: true
   },
-  {
-    toJSON: {
-      getters: true,
-    },
-  }
-);
+  id: false
+});
+
+// Retrieves the length of the user's `friends` array field on query.
+UserSchema.virtual("friendCount").get(function () {
+  return this.friends.length;
+});
 
 const User = model('User', UserSchema);
 
