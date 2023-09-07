@@ -21,7 +21,7 @@ module.exports = {
     // Get single Thought
     async getSingleThought(req, res) {
         try {
-            const thought = await Thought.findOne({ _id: req.params.ThoughtId})
+            const thought = await Thought.findOne({ _id: req.params.thoughtId})
             .populate({
                 path: 'reactions',
                 select: '-__v'
@@ -41,8 +41,8 @@ module.exports = {
     async createThought(req, res) {
         try {
             const thought = await Thought.create(req.body);
-            const createThought = await User.findOneAndUpdate({_id: req.params.UserId},
-                { $push: { thoughts: req.params.ThoughtId }})
+            const createThought = await User.findOneAndUpdate({_id: req.body.userId},
+                { $push: { thoughts: thought._id }})
             res.json(createThought);
         } catch (err) {
             console.log(err);
@@ -52,7 +52,7 @@ module.exports = {
     // Update User
     async updateThought(req, res) {
         try {
-            const updateThought = await Thought.findOneAndUpdate({ _id: req.params.ThoughtId }, 
+            const updateThought = await Thought.findOneAndUpdate({ _id: req.params.thoughtId }, 
                 req.body, 
                 { new: true,
                     //  runValidators: true 
@@ -66,7 +66,7 @@ module.exports = {
     // Delete Thought 
     async deleteThought(req, res) {
         try {
-            const deleteThought = await Thought.findOneAndRemove({ _id: req.params.ThoughtId });
+            const deleteThought = await Thought.findOneAndRemove({ _id: req.params.thoughtId });
             res.json({ message: 'Thought successfully deleted' });
         } catch (err) {
             console.log(err);
@@ -76,8 +76,8 @@ module.exports = {
     // Add a reaction to Thought
     async addReaction(req, res) {
     try {
-      const addReaction = await User.findOneAndUpdate({ _id: req.params.ThoughtId },
-        { $push: { reactions: req.params.reactionId } },
+      const addReaction = await Thought.findOneAndUpdate({ _id: req.params.thoughtId },
+        { $push: { reactions: req.body } },
         { new: true,
             // runValidators: true 
         });
@@ -91,7 +91,7 @@ module.exports = {
     async deleteReaction(req, res) {
         try {
         const deleteReaction = await User.findOneAndUpdate(
-            {  _id: req.params.ThoughtId },
+            {  _id: req.params.thoughtId },
             { $pull: { reactions: req.params.thoughtId } },
             { new: true }
         );
