@@ -29,7 +29,7 @@ module.exports = {
               .select('-__v')
 
             if(!thought) {
-                return res.status(404).json({ message: 'No user with that ID' })
+                return res.status(404).json({ message: 'No thought with that ID' })
             }
            res.json(thought);
         } catch (err) {
@@ -90,9 +90,9 @@ module.exports = {
     // Remove a reaction from Thought
     async deleteReaction(req, res) {
         try {
-        const deleteReaction = await User.findOneAndUpdate(
+        const deleteReaction = await Thought.findOneAndUpdate(
             {  _id: req.params.thoughtId },
-            { $pull: { reactions: req.params.thoughtId } },
+            { $pull: { reactions: { _id: req.params.reactionId }} },
             { new: true }
         );
         res.json(deleteReaction);
